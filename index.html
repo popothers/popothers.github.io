@@ -1,4 +1,4 @@
-https://github.com/popothers/popothers.github.io.git<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Hangman Game</title>
@@ -32,7 +32,7 @@ https://github.com/popothers/popothers.github.io.git<!DOCTYPE html>
     <div id="settings-modal" class="modal" style="display: block;">
         <div class="modal-content">
             <h2>Hangman Settings</h2>
-            <p>Hangman Version 1.01 - Goated Update</p>
+            <p>Hangman Version 1.02 - Goated Update</p>
             <label for="language-select">Language:</label>
             <select id="language-select">
                 <option value="en-us">English (Simplified)</option>
@@ -248,7 +248,7 @@ https://github.com/popothers/popothers.github.io.git<!DOCTYPE html>
               if (checkWin()) {
                   alert("Congratulations! You've won!");
                   if (guessedWord.join("") === "cheezburger") {
-                    var audio = new Audio("https://static.wikia.nocookie.net/roblox/images/3/38/Cheezburger.ogg");
+                    var audio = new Audio("Cheezburger.ogg");
                     audio.play()
                   }
                   resetGame();
