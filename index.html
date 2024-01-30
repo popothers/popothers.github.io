@@ -1,0 +1,314 @@
+https://github.com/popothers/popothers.github.io.git<!DOCTYPE html>
+<html>
+<head>
+    <title>Hangman Game</title>
+    <style>
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+        }
+
+        .keyboard-button {
+            width: 40px;
+            height: 40px;
+            margin: 5px;
+            padding: 0;
+            background-color: #eee;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        body {
+          font-family: "Helvetica";
+          color: "white"
+        }
+    </style>
+</head>
+<body>
+  <center>
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal" style="display: block;">
+        <div class="modal-content">
+            <h2>Hangman Settings</h2>
+            <p>Hangman Version 1.01 - Goated Update</p>
+            <label for="language-select">Language:</label>
+            <select id="language-select">
+                <option value="en-us">English (Simplified)</option>
+                <option value="en-gb">English (Traditional)</option>
+                <option value="en-sl">English (Goated)</option>
+            </select>
+            <br>
+            <label for="max-incorrect-guesses">Max Incorrect Guesses (0-26):</label>
+            <input type="number" id="max-incorrect-guesses" min="0" max="26">
+            <br>
+            <label for="background-color-select">Background Color:</label>
+            <select id="background-color-select">
+                <option value="white">White</option>
+                <option value="black">Black</option>
+            </select>
+            <br>
+            <button id="start-game-button">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Hangman Game -->
+    <div id="hangman-game" style="display: none;">
+        <h1>Hangman Game</h1>
+        <p>Guess the word by clicking on the letter buttons below.</p>
+
+        <div id="word-container">
+            <p id="word"></p>
+        </div>
+
+        <p>Incorrect guesses: <span id="incorrect-guesses"></span></p>
+
+        <div id="keyboard">
+            <!-- Buttons for each letter -->
+        </div>
+    </div>
+
+    <script>
+      // List of words for different languages
+      const wordLists = {
+          "en-us": [
+              "gasses",
+              "funny",
+              "amazing",
+              "organized",
+              "printer",
+              "document",
+              "color",
+              "welcome",
+              "vexed",
+              "garbage",
+              "cookie",
+              "chips",
+              "adventure",
+              "fruit",
+              "cute",
+              "friend",
+              "center",
+              "campaign",
+              "american",
+              "pronunciation",
+              "juvenile",
+              "research",
+              "frappuccino",
+              "recreational",
+              "swinging",
+              "train",
+              "metropolitan",
+              "windshield",
+              "dude",
+              "uncanny",
+              "defense",
+              "aibohpophobia",
+              "heavenly",
+              "factorium",
+              "neighbor",
+              "grandmother",
+              "electrical",
+              "wiki",
+              "winner",
+              "found",
+              "grunt",
+              "simulation",
+              "virtual",
+              "hippopotomonstrosesquippedaliophobia"
+          ],
+          "en-gb": [
+              "gases",
+              "funny",
+              "amazing",
+              "organised",
+              "printer",
+              "document",
+              "colour",
+              "welcome",
+              "vexed",
+              "rubbish",
+              "biscuit",
+              "crisps",
+              "adventure",
+              "fruit",
+              "cute",
+              "friend",
+              "centre",
+              "campaign",
+              "american",
+              "pronunciation",
+              "juvenile",
+              "research",
+              "frappuccino",
+              "recreational",
+              "swinging",
+              "tram",
+              "metropolitan",
+              "windscreen",
+              "bloke",
+              "uncanny",
+              "defence",
+              "aibohpophobia",
+              "heavenly",
+              "factorium",
+              "neighbour",
+              "grandmother",
+              "electrical",
+              "wiki",
+              "winner",
+              "found",
+              "squaddie",
+              "simulation",
+              "virtual",
+              "hippopotomonstrosesquippedaliophobia"
+          ],
+          "en-sl": [
+              "simp",
+              "rizz",
+              "bussin",
+              "rizzler",
+              "goated",
+              "slig",
+              "sus",
+              "impostor",
+              "shimmi",
+              "gyatt",
+              "skibidi",
+              "fanumtax",
+              "sigma",
+              "cheezburger"
+          ]
+      };
+  
+      // Initialize variables
+      let chosenWord = "";
+      let guessedWord = [];
+      let incorrectGuesses = 0;
+      let maxIncorrectGuesses = 0;
+      let backgroundColor = "white";
+  
+      // Select a random word from the list based on the selected language
+      function selectRandomWord(language) {
+          const wordList = wordLists[language];
+          if (!wordList) {
+              alert("Invalid language selection. Defaulting to English (American).");
+              return wordLists["en-us"];
+          }
+          const randomIndex = Math.floor(Math.random() * wordList.length);
+          return wordList[randomIndex];
+      }
+  
+      // Reset the game
+      function resetGame() {
+          const language = document.getElementById("language-select").value;
+          maxIncorrectGuesses = parseInt(document.getElementById("max-incorrect-guesses").value, 10);
+          backgroundColor = document.getElementById("background-color-select").value;
+          
+          chosenWord = selectRandomWord(language).toLowerCase();
+          guessedWord = new Array(chosenWord.length).fill("_");
+          incorrectGuesses = 0;
+          updateDisplay();
+          createLetterButtons();
+      }
+  
+      // Update the word display
+      function updateDisplay() {
+          document.getElementById("word").textContent = guessedWord.join(" ");
+          document.getElementById("incorrect-guesses").textContent = `${incorrectGuesses} / ${maxIncorrectGuesses}`;
+          document.body.style.backgroundColor = backgroundColor;
+      }
+  
+      // Check if the player has won
+      function checkWin() {
+          return guessedWord.join("") === chosenWord;
+      }
+  
+      // Handle a guess
+      function handleGuess(letter) {
+          if (guessedWord.indexOf(letter) === -1) {
+              const indices = [];
+              for (let i = 0; i < chosenWord.length; i++) {
+                  if (chosenWord[i] === letter) {
+                      indices.push(i);
+                  }
+              }
+  
+              if (indices.length > 0) {
+                  for (const index of indices) {
+                      guessedWord[index] = letter;
+                  }
+              } else {
+                  incorrectGuesses++;
+              }
+  
+              updateDisplay();
+  
+              if (checkWin()) {
+                  alert("Congratulations! You've won!");
+                  if (guessedWord.join("") === "cheezburger") {
+                    var audio = new Audio("https://static.wikia.nocookie.net/roblox/images/3/38/Cheezburger.ogg");
+                    audio.play()
+                  }
+                  resetGame();
+              } else if (incorrectGuesses >= maxIncorrectGuesses) {
+                  alert("Game over! You've reached the maximum incorrect guesses. the word was " + chosenWord + ".");
+                  resetGame();
+              }
+          }
+      }
+  
+      // Create letter buttons
+      function createLetterButtons() {
+          const keyboard = document.getElementById("keyboard");
+          keyboard.innerHTML = "";
+  
+          const rows = [
+              "qwertyuiop",
+              "asdfghjkl",
+              "zxcvbnm"
+          ];
+  
+          for (const row of rows) {
+              const rowDiv = document.createElement("div");
+              rowDiv.classList.add("keyboard-row");
+  
+              for (const letter of row) {
+                  const button = document.createElement("button");
+                  button.textContent = letter;
+                  button.classList.add("keyboard-button");
+                  button.addEventListener("click", () => handleGuess(letter));
+                  rowDiv.appendChild(button);
+              }
+  
+              keyboard.appendChild(rowDiv);
+          }
+      }
+      
+      // Start game button click event
+        document.getElementById("start-game-button").addEventListener("click", () => {
+            const settingsModal = document.getElementById("settings-modal");
+            const hangmanGame = document.getElementById("hangman-game");
+            const backgroundColorSelect = document.getElementById("background-color-select");
+
+            const selectedBackgroundColor = backgroundColorSelect.value;
+            const textColor = selectedBackgroundColor === "white" ? "black" : "white";
+
+            settingsModal.style.display = "none";
+            settingsModal.style.backgroundColor = selectedBackgroundColor;
+            settingsModal.style.color = textColor;
+
+            hangmanGame.style.display = "block";
+            hangmanGame.style.backgroundColor = selectedBackgroundColor;
+            hangmanGame.style.color = textColor;
+
+            // Initialize the game with selected settings
+            resetGame();
+        });
+      // Initialize the game
+      resetGame();
+    </script>
+  </center>
+</body>
+</html>
