@@ -278,6 +278,7 @@
                   const button = document.createElement("button");
                   button.textContent = letter;
                   button.classList.add("keyboard-button");
+                  button.setAttribute("id", letter);
                   button.addEventListener("click", () => handleGuess(letter));
                   rowDiv.appendChild(button);
               }
